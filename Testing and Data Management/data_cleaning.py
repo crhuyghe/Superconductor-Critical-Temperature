@@ -25,6 +25,6 @@ norm_X = scaler.fit_transform(scaler.inverse_transform(cleaned_X))
 mean_X = scaler.mean_
 std_X = scaler.scale_
 
-pd.DataFrame(cleaned_X, columns=X.keys()).to_csv("../Cleaned Data/cleaned_features.csv", index=False)
+pd.DataFrame(cleaned_X, columns=X.keys(), dtype="float32").to_csv("../Cleaned Data/cleaned_features.csv", index=False)
 pd.DataFrame(cleaned_y, columns=y.keys()).to_csv("../Cleaned Data/cleaned_target.csv", index=False)
 json.dump({"mean": list(mean_X), "std": list(std_X)}, open("../Cleaned Data/feature_statistics.json", "w"))

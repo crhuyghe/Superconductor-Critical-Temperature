@@ -31,21 +31,30 @@ cleaned_norm_train_X = norm_train_X[outliers == 1]
 cleaned_train_y = train_y[outliers == 1]
 
 
-# Testing Multiple Linear Regression
-regression = LinearRegression()
-regression.fit(norm_train_X, train_y)
-
-print("Linear Regression R^2 for training data:", regression.score(cleaned_norm_train_X, cleaned_train_y))
-print("Linear Regression RMSE for training data:", mean_squared_error(regression.predict(cleaned_norm_train_X), cleaned_train_y)**.5)
-
-print("Linear Regression R^2 for test data:", regression.score(norm_test_X, test_y))
-print("Linear Regression RMSE for test data:", mean_squared_error(regression.predict(norm_test_X), test_y)**.5)
-
-
 # Calculating PCA of data
 pca = decomposition.PCA(n_components=22)
 transformed_train_X = pca.fit_transform(cleaned_norm_train_X)
 transformed_test_X = pca.transform(norm_test_X)
+
+
+# Testing Multiple Linear Regression
+regression = LinearRegression()
+regression.fit(transformed_train_X, cleaned_train_y)
+
+print("Linear Regression R^2 for training data with PCA:", regression.score(transformed_train_X, cleaned_train_y))
+print("Linear Regression RMSE for training data with PCA:", mean_squared_error(regression.predict(transformed_train_X), cleaned_train_y)**.5)
+
+print("Linear Regression R^2 for test data with PCA:", regression.score(transformed_test_X, test_y))
+print("Linear Regression RMSE for test data with PCA:", mean_squared_error(regression.predict(transformed_test_X), test_y)**.5)
+
+regression = LinearRegression()
+regression.fit(cleaned_norm_train_X, cleaned_train_y)
+
+print("\nLinear Regression R^2 for training data:", regression.score(cleaned_norm_train_X, cleaned_train_y))
+print("Linear Regression RMSE for training data:", mean_squared_error(regression.predict(cleaned_norm_train_X), cleaned_train_y)**.5)
+
+print("Linear Regression R^2 for test data:", regression.score(norm_test_X, test_y))
+print("Linear Regression RMSE for test data:", mean_squared_error(regression.predict(norm_test_X), test_y)**.5)
 
 data = []
 pd.set_option('display.max_rows', None)
@@ -64,7 +73,7 @@ for n in [10, 50, 100]:
         test_rmse = mean_squared_error(rfr.predict(norm_test_X), test_y)**.5
         data.append([n, depth, train_R2, train_rmse, test_R2, test_rmse])
 
-print(f"{time() - t:2} seconds without PCA")
+print(f"\n{time() - t:2} seconds without PCA")
 
 print("Results (without PCA)")
 print(pd.DataFrame(data, columns=["n_estimators", "max_depth", "Training R^2", "Training RMSE", "Test R^2", "Test RMSE"]))
@@ -83,7 +92,17 @@ for n in [10, 50, 100]:
         test_rmse = mean_squared_error(rfr.predict(transformed_test_X), test_y)**.5
         data.append([n, depth, train_R2, train_rmse, test_R2, test_rmse])
 
-print(f"{time() - t:2} seconds with PCA")
+print(f"\n{time() - t:2} seconds with PCA")
 
 print("Results (with PCA)")
 print(pd.DataFrame(data, columns=["n_estimators", "max_depth", "Training R^2", "Training RMSE", "Test R^2", "Test RMSE"]))
+
+rfr = RandomForestRegressor(n_estimators=50, random_state=20, n_jobs=100, max_depth=23)
+rfr.fit(transformed_train_X, cleaned_train_y.to_numpy().ravel())
+
+residuals = rfr.predict(pca.transform(scaler.transform(X)))-y.to_numpy().reshape(1, -1)[0]
+plt.scatter(y, residuals)
+plt.xlabel("Critical Temperature (Kelvin)")
+plt.ylabel("Residual magnitude (Kelvin)")
+plt.title("Distribution of residuals")
+plt.show()
