@@ -97,10 +97,16 @@ print(f"\n{time() - t:2} seconds with PCA")
 print("Results (with PCA)")
 print(pd.DataFrame(data, columns=["n_estimators", "max_depth", "Training R^2", "Training RMSE", "Test R^2", "Test RMSE"]))
 
-rfr = RandomForestRegressor(n_estimators=50, random_state=20, n_jobs=100, max_depth=23)
-rfr.fit(transformed_train_X, cleaned_train_y.to_numpy().ravel())
 
-residuals = rfr.predict(pca.transform(scaler.transform(X)))-y.to_numpy().reshape(1, -1)[0]
+X = pd.read_csv('../Cleaned Data/cleaned_features.csv')
+y = pd.read_csv('../Cleaned Data/cleaned_target.csv')
+
+pca = decomposition.PCA(n_components=22)
+X = pca.fit_transform(X)
+
+rfr = RandomForestRegressor(n_estimators=50, random_state=20, n_jobs=100, max_depth=23)
+rfr.fit(X, y.to_numpy().ravel())
+residuals = rfr.predict(X)-y.to_numpy().reshape(1, -1)[0]
 plt.scatter(y, residuals)
 plt.xlabel("Critical Temperature (Kelvin)")
 plt.ylabel("Residual magnitude (Kelvin)")
