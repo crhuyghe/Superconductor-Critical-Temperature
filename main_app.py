@@ -23,7 +23,7 @@ restored_data[restored_data.keys()[0]] = restored_data[restored_data.keys()[0]].
 
 print("Generating model...")
 
-rfr = RandomForestRegressor(n_estimators=50, random_state=20, n_jobs=100, max_depth=23)
+rfr = RandomForestRegressor(n_estimators=100, random_state=20, n_jobs=100, max_depth=35)
 rfr.fit(X, y.to_numpy().ravel())
 
 pd.set_option('display.max_rows', None)
@@ -36,7 +36,7 @@ with gr.Blocks(theme="citrus") as app:
     with gr.Row(equal_height=True):
         button = gr.Button("Estimate Critical Temperature")
         result_box = gr.Textbox("", label="Estimate")
-        button.click(fn=lambda i: f"{rfr.predict(pca.transform(samp.iloc[i-1:i]))[0]:.3f} \u00B1 10.376 Kelvin", inputs=slider,
+        button.click(fn=lambda i: f"{rfr.predict(pca.transform(samp.iloc[i-1:i]))[0]:.3f} \u00B1 9.958 Kelvin", inputs=slider,
                      outputs=result_box)
 
 app.launch()
